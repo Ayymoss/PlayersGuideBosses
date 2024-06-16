@@ -37,6 +37,7 @@ public static class Program
             {
                 case UserAction.ToggleDoor:
                     var doorResult = _door.ToggleDoor();
+
                     if (!doorResult)
                     {
                         AnsiConsole.MarkupLine("[red]The door is locked[/]");
@@ -50,6 +51,7 @@ public static class Program
                 case UserAction.ToggleLock:
                     var password = AskDoorPassword();
                     var lockResult = _door.ToggleLock(password);
+
                     if (!lockResult)
                     {
                         AnsiConsole.MarkupLine("[red]Incorrect password[/]");
@@ -64,6 +66,7 @@ public static class Program
                     var oldPassword = AskDoorPassword("Enter [red]old[/] password:");
                     var newPassword = AskDoorPassword("Enter [blue]new[/] password:");
                     var codeResult = _door.SetPassword(oldPassword, newPassword);
+
                     if (!codeResult)
                     {
                         AnsiConsole.MarkupLine("[red]Incorrect password[/]");
@@ -76,7 +79,7 @@ public static class Program
                     atTheDoor = false;
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(actionParsed), actionParsed, "Invalid action.");
             }
 
             if (!atTheDoor) break;

@@ -10,14 +10,14 @@ public class Door(string password)
     public bool ToggleLock(string userPassword)
     {
         if (!string.Equals(userPassword, password, StringComparison.CurrentCulture)) return false;
-        LockState = LockState == LockState.Locked ? LockState.Unlocked : LockState.Locked;
+        LockState = LockState is LockState.Locked ? LockState.Unlocked : LockState.Locked;
         return true;
     }
 
     public bool ToggleDoor()
     {
-        if (LockState.Locked == LockState) return false;
-        DoorState = DoorState == DoorState.Open ? DoorState.Closed : DoorState.Open;
+        if (LockState.Locked.Equals(LockState)) return false;
+        DoorState = DoorState is DoorState.Open ? DoorState.Closed : DoorState.Open;
         return true;
     }
 
