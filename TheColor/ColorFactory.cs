@@ -6,14 +6,14 @@ public abstract class ColorFactory
     {
         return colorType switch
         {
-            ColorType.Red => new Color(255, 0, 0),
-            ColorType.Green => new Color(0, 255, 0),
-            ColorType.Blue => new Color(0, 0, 255),
-            ColorType.White => new Color(255, 255, 255),
             ColorType.Black => new Color(),
-            ColorType.Orange => new Color(255, 165, 0),
-            ColorType.Yellow => new Color(255, 255, 0),
-            ColorType.Purple => new Color(128, 0, 128),
+            ColorType.Red => new Color(255),
+            ColorType.Green => new Color(green: 255),
+            ColorType.Blue => new Color(blue: 255),
+            ColorType.Purple => new Color(128, blue: 128),
+            ColorType.Orange => new Color(255, 165),
+            ColorType.Yellow => new Color(255, 255),
+            ColorType.White => new Color(255, 255, 255),
             _ => new Color()
         };
     }
