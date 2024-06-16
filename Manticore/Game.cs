@@ -64,12 +64,12 @@ public class Game
     public void Setup()
     {
         _round = 1;
-        _player = new Player();
+        _player = new Player(15);
 
         var distance = "[red]Manticore Player[/]: What distance is the manticore?".IntHelper();
         Console.Clear();
 
-        _manticore = new Actors.Manticore { Distance = distance };
+        _manticore = new Actors.Manticore(10) { Distance = distance };
     }
 
     private void PrintStatus()

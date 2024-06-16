@@ -1,6 +1,6 @@
 ﻿namespace Manticore.Actors;
 
-public class Manticore() : Actor(10)
+public class Manticore(int health) : Actor(health)
 {
     public int Distance { get; init; }
 }
