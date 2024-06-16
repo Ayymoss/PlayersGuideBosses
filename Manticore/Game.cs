@@ -77,7 +77,7 @@ public class Game
         AnsiConsole.MarkupLine("------------------------------------------------");
         AnsiConsole.MarkupLine($"STATUS: [yellow]Round[/]: {_round} | " +
                                $"[blue]City[/]: {_player.Health}/{_player.InitialHealth} | " +
-                               $"[red]Manticore[/]: {_manticore.Health}/{_manticore.InitialHealth} | ");
+                               $"[red]Manticore[/]: {_manticore.Health}/{_manticore.InitialHealth}");
     }
 
     private bool ShouldGameEnd() => _manticore.Health <= 0 || _player.Health <= 0;
