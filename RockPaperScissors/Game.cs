@@ -1,8 +1,8 @@
 ﻿using Humanizer;
+using RockPaperScissors.Enums;
 using Spectre.Console;
-using TheChamberOfDesign.Enums;
 
-namespace TheChamberOfDesign;
+namespace RockPaperScissors;
 
 public class Game(Player playerOne, Player playerTwo)
 {

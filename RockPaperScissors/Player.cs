@@ -1,4 +1,4 @@
-﻿namespace TheChamberOfDesign;
+﻿namespace RockPaperScissors;
 
 public class Player(string name)
 {

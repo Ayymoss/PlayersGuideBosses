@@ -1,6 +1,6 @@
 ﻿using Spectre.Console;
 
-namespace TheChamberOfDesign;
+namespace RockPaperScissors;
 
 public static class Program
 {

@@ -1,4 +1,4 @@
-﻿namespace TheChamberOfDesign.Enums;
+﻿namespace RockPaperScissors.Enums;
 
 public enum Choice
 {
