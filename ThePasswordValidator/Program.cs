@@ -9,8 +9,7 @@ public static class Program
     {
         while (true)
         {
-            var password = AnsiConsole.Ask<string>("[blue]Test password:[/]");
-            var results = PasswordValidator.Validate(password);
+            var results = AnsiConsole.Ask<string>("[blue]Test password:[/]").ValidatePassword();
 
             foreach (var result in results)
             {
@@ -23,7 +22,7 @@ public static class Program
                         AnsiConsole.MarkupLine("[red]Password is invalid: invalid length[/]");
                         break;
                     case ValidationResult.ForbiddenCharacters:
-                        AnsiConsole.MarkupLine("[red]Password is invalid: forbidden characters[/]");
+                        AnsiConsole.MarkupLine("[red]Password is invalid: forbidden characters ('T', '&')[/]");
                         break;
                     case ValidationResult.NoUpperCase:
                         AnsiConsole.MarkupLine("[red]Password is invalid: no uppercase characters[/]");

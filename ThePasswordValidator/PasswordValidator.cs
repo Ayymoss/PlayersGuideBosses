@@ -2,11 +2,11 @@
 
 namespace ThePasswordValidator;
 
-public abstract class PasswordValidator
+public static class PasswordValidator
 {
     private static readonly List<char> InvalidChars = ['T', '&'];
 
-    public static IEnumerable<ValidationResult> Validate(string password)
+    public static IEnumerable<ValidationResult> ValidatePassword(this string password)
     {
         var failedResults = new List<ValidationResult>();
         if (password.Length is < 6 or > 13) failedResults.Add(ValidationResult.InvalidLength);
