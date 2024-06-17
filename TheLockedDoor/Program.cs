@@ -22,15 +22,14 @@ public static class Program
         {
             PrintStatus();
 
-            var action = AnsiConsole.Prompt(
-                new SelectionPrompt<string>()
-                    .Title("What do you want to do?")
-                    .AddChoices([
-                        UserAction.ToggleDoor.Humanize().Titleize(),
-                        UserAction.ToggleLock.Humanize().Titleize(),
-                        UserAction.SetCode.Humanize().Titleize(),
-                        UserAction.Exit.Humanize().Titleize()
-                    ]));
+            var action = AnsiConsole.Prompt(new SelectionPrompt<string>()
+                .Title("What do you want to do?")
+                .AddChoices([
+                    UserAction.ToggleDoor.Humanize().Titleize(),
+                    UserAction.ToggleLock.Humanize().Titleize(),
+                    UserAction.SetCode.Humanize().Titleize(),
+                    UserAction.Exit.Humanize().Titleize()
+                ]));
             var actionParsed = action.DehumanizeTo<UserAction>();
 
             switch (actionParsed)

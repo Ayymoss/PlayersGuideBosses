@@ -12,17 +12,17 @@ public class Game(Player playerOne, Player playerTwo)
 
     private readonly Dictionary<Round, Winner> _resultMap = new()
     {
-        { new Round(Choice.Rock, Choice.Scissors), Winner.PlayerOne },
-        { new Round(Choice.Scissors, Choice.Paper), Winner.PlayerOne },
-        { new Round(Choice.Paper, Choice.Rock), Winner.PlayerOne },
+        [new Round(Choice.Rock, Choice.Scissors)] = Winner.PlayerOne,
+        [new Round(Choice.Scissors, Choice.Paper)] = Winner.PlayerOne,
+        [new Round(Choice.Paper, Choice.Rock)] = Winner.PlayerOne,
 
-        { new Round(Choice.Rock, Choice.Paper), Winner.PlayerTwo },
-        { new Round(Choice.Scissors, Choice.Rock), Winner.PlayerTwo },
-        { new Round(Choice.Paper, Choice.Scissors), Winner.PlayerTwo },
+        [new Round(Choice.Rock, Choice.Paper)] = Winner.PlayerTwo,
+        [new Round(Choice.Scissors, Choice.Rock)] = Winner.PlayerTwo,
+        [new Round(Choice.Paper, Choice.Scissors)] = Winner.PlayerTwo,
 
-        { new Round(Choice.Rock, Choice.Rock), Winner.Draw },
-        { new Round(Choice.Paper, Choice.Paper), Winner.Draw },
-        { new Round(Choice.Scissors, Choice.Scissors), Winner.Draw }
+        [new Round(Choice.Rock, Choice.Rock)] = Winner.Draw,
+        [new Round(Choice.Paper, Choice.Paper)] = Winner.Draw,
+        [new Round(Choice.Scissors, Choice.Scissors)] = Winner.Draw
     };
 
     public void PlayRound()
