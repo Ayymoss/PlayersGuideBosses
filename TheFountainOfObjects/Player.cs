@@ -2,9 +2,7 @@
 
 namespace TheFountainOfObjects;
 
-public class Position(byte x = 0, byte y = 0)
+public class Player(byte x = 0, byte y = 0) : Entity(x, y)
 {
-    public byte X { get; set; } = x;
-    public byte Y { get; set; } = y;
     public required RoomBase CurrentRoom { get; set; }
 }

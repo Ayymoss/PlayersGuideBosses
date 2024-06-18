@@ -2,15 +2,20 @@
 
 public class Entrance : RoomBase
 {
-    public event Action? IsFountainActivated;
-    public required Fountain Fountain { get; init; }
-
-    public override string RoomDialogue()
+    protected override RoomInstruction GetRoomInstructions()
     {
-        if (Fountain.Activated) IsFountainActivated?.Invoke();
+        return new RoomInstruction
+        {
+            Room = this,
+            Dialogue = GameState.FountainActivated
+                ? "[blue]The Fountain of Objects has been reactivated, and you have escaped with your life![/]"
+                : "You see light in this room coming from outside the cavern. This is the entrance.",
+        };
+    }
 
-        return Fountain.Activated
-            ? "The Fountain of Objects has been reactivated, and you have escaped with your life!"
-            : "You see light in this room coming from outside the cavern. This is the entrance.";
+    public override RoomInstruction EnterRoom()
+    {
+        if (GameState.FountainActivated) GameState.IsGameOver = true;
+        return base.EnterRoom();
     }
 }

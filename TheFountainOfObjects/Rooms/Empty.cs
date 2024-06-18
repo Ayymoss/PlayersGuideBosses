@@ -2,5 +2,12 @@
 
 public class Empty : RoomBase
 {
-    public override string RoomDialogue() => "This room is empty.";
+    protected override RoomInstruction GetRoomInstructions()
+    {
+        return new RoomInstruction
+        {
+            Room = this,
+            Dialogue = "[grey]This room is empty.[/]"
+        };
+    }
 }

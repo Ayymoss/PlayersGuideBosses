@@ -1,11 +1,15 @@
-﻿namespace TheFountainOfObjects.Rooms;
+﻿using TheFountainOfObjects.Enums;
+
+namespace TheFountainOfObjects.Rooms;
 
 public class Pit : RoomBase
 {
-    public event Action? HasFallen;
-    public override string RoomDialogue()
+    protected override RoomInstruction GetRoomInstructions()
     {
-        HasFallen?.Invoke();
-        return "You have fallen into a pit. You are dead.";
+        return new RoomInstruction
+        {
+            Room = this,
+            Dialogue = "[red]You have fallen into a pit. You are dead.[/]",
+        };
     }
 }
