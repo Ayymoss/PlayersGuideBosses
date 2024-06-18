@@ -13,6 +13,8 @@ public abstract class RoomBase
 
     public virtual string[] HandleRoomAction(Choice choice) => [];
 
+    public virtual string[] AdjacentRoomCheck() => [];
+
     public virtual RoomInstruction EnterRoom()
     {
         Visited = true;

@@ -23,9 +23,9 @@ public class Game
 
         _rooms = new RoomBase[gridSize, gridSize];
 
-        for (byte i = 0; i < gridSize; i++)
+        for (var i = 0; i < gridSize; i++)
         {
-            for (byte j = 0; j < gridSize; j++)
+            for (var j = 0; j < gridSize; j++)
             {
                 _rooms[i, j] = new Empty { GameState = _gameState };
             }
@@ -33,22 +33,25 @@ public class Game
 
         _rooms[0, 0] = new Entrance { GameState = _gameState };
 
-        var fountainLocation = GetFreeRoomLocation();
+        var fountainLocation = GetEmptyRoomLocation();
         _rooms[fountainLocation.X, fountainLocation.Y] = new Fountain { GameState = _gameState };
 
-        var pitLocation = GetFreeRoomLocation();
+        var pitLocation = GetEmptyRoomLocation();
         _rooms[pitLocation.X, pitLocation.Y] = new Pit { GameState = _gameState };
 
         for (var i = 0; i < maelstromCount; i++)
         {
-            var maelstromLocation = GetFreeRoomLocation();
+            var maelstromLocation = GetEmptyRoomLocation();
             _rooms[maelstromLocation.X, maelstromLocation.Y] = new Maelstrom { GameState = _gameState };
+
+            var amarokLocation = GetEmptyRoomLocation();
+            _rooms[amarokLocation.X, amarokLocation.Y] = new Amarok { GameState = _gameState };
         }
 
         _player = new Player { CurrentRoom = _rooms[0, 0] };
     }
 
-    private (byte X, byte Y) GetFreeRoomLocation()
+    private (byte X, byte Y) GetEmptyRoomLocation()
     {
         int x;
         int y;
@@ -66,6 +69,7 @@ public class Game
         while (!_gameState.IsGameOver)
         {
             PrintPosition();
+            CheckAdjacentRooms();
             var move = HandleUserInput();
             var instructions = HandleChoice(move).EnterRoom();
 
@@ -163,37 +167,70 @@ public class Game
         switch (movement)
         {
             case Choice.North when roomLocation.Y > _rooms.GetLowerBound(1):
-                if (_rooms[x, y - 1] is Empty)
+                _rooms[x, y] = new Empty { GameState = _gameState };
+
+                if (_rooms[x, y - 1] is not Empty)
                 {
-                    _rooms[x, y] = new Empty { GameState = _gameState };
-                    _rooms[x, y - 1] = room;
+                    var (ranX, ranY) = GetEmptyRoomLocation();
+                    _rooms[ranX, ranY] = room;
                 }
 
+                _rooms[x, y - 1] = room;
                 break;
             case Choice.East when roomLocation.X < _rooms.GetUpperBound(0):
-                if (_rooms[x + 1, y] is Empty)
+                _rooms[x, y] = new Empty { GameState = _gameState };
+
+                if (_rooms[x + 1, y] is not Empty)
                 {
-                    _rooms[x, y] = new Empty { GameState = _gameState };
-                    _rooms[x + 1, y] = room;
+                    var (ranX, ranY) = GetEmptyRoomLocation();
+                    _rooms[ranX, ranY] = room;
                 }
 
+                _rooms[x + 1, y] = room;
                 break;
             case Choice.South when roomLocation.Y < _rooms.GetUpperBound(1):
-                if (_rooms[x, y + 1] is Empty)
+                _rooms[x, y] = new Empty { GameState = _gameState };
+
+                if (_rooms[x, y + 1] is not Empty)
                 {
-                    _rooms[x, y] = new Empty { GameState = _gameState };
-                    _rooms[x, y + 1] = room;
+                    var (ranX, ranY) = GetEmptyRoomLocation();
+                    _rooms[ranX, ranY] = room;
                 }
+
+                _rooms[x, y + 1] = room;
 
                 break;
             case Choice.West when roomLocation.X > _rooms.GetLowerBound(0):
-                if (_rooms[x - 1, y] is Empty)
+                _rooms[x, y] = new Empty { GameState = _gameState };
+
+                if (_rooms[x - 1, y] is not Empty)
                 {
-                    _rooms[x, y] = new Empty { GameState = _gameState };
-                    _rooms[x - 1, y] = room;
+                    var (ranX, ranY) = GetEmptyRoomLocation();
+                    _rooms[ranX, ranY] = room;
                 }
 
+                _rooms[x - 1, y] = room;
                 break;
+        }
+    }
+
+    private void CheckAdjacentRooms()
+    {
+        for (var i = _player.X - 1; i <= _player.X + 1; i++)
+        {
+            for (var j = _player.Y - 1; j <= _player.Y + 1; j++)
+            {
+                var isCurrentRoom = i == _player.X && j == _player.Y;
+                var crossLeftBoundary = i < _rooms.GetLowerBound(0);
+                var crossRightBoundary = i > _rooms.GetUpperBound(0);
+                var crossUpperBoundary = j < _rooms.GetLowerBound(1);
+                var crossLowerBoundary = j > _rooms.GetUpperBound(1);
+
+                if (isCurrentRoom || crossLeftBoundary || crossRightBoundary || crossUpperBoundary || crossLowerBoundary) continue;
+
+                var room = _rooms[i, j];
+                HandleDialogue(room.AdjacentRoomCheck());
+            }
         }
     }
 

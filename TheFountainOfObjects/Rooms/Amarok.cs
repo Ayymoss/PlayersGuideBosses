@@ -1,16 +1,17 @@
-﻿
-namespace TheFountainOfObjects.Rooms;
+﻿namespace TheFountainOfObjects.Rooms;
 
-public class Pit : RoomBase
+public class Amarok : RoomBase
 {
     protected override RoomInstruction GetRoomInstructions()
     {
         return new RoomInstruction
         {
             Room = this,
-            Dialogue = "[red]You have fallen into a pit. You are dead.[/]",
+            Dialogue = "[red]You are in a room with a large wolf. You died.[/]"
         };
     }
+
+    public override string[] AdjacentRoomCheck() => ["You can smell the rotten stench of an amarok in a nearby room."];
 
     public override RoomInstruction EnterRoom()
     {
