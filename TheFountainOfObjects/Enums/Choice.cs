@@ -2,9 +2,17 @@
 
 public enum Choice
 {
-    North,
-    East,
-    South,
-    West,
-    Activate
+    Activate,
+
+    MoveNorth,
+    MoveEast,
+    MoveSouth,
+    MoveWest,
+
+    ShootNorth,
+    ShootEast,
+    ShootSouth,
+    ShootWest,
+
+    Attack
 }

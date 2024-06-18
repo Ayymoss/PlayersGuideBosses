@@ -73,22 +73,11 @@ public class Game
             var move = HandleUserInput();
             var instructions = HandleChoice(move).EnterRoom();
 
-            do
+            do // TODO: Handle rooms if moved through many quickly (e.g. maelstrom). Currently they're skipped over.
             {
-                if (instructions.Dialogue is not null)
-                {
-                    HandleDialogue(instructions.Dialogue);
-                }
-
-                if (instructions.PlayerMovement is not null)
-                {
-                    HandleChoice(instructions.PlayerMovement.Value);
-                }
-
-                if (instructions.RoomMovement is not null)
-                {
-                    MoveRoomLocation(instructions.Room, instructions.RoomMovement.Value);
-                }
+                if (instructions.Dialogue is not null) HandleDialogue(instructions.Dialogue);
+                if (instructions.PlayerMovement is not null) HandleChoice(instructions.PlayerMovement.Value);
+                if (instructions.RoomMovement is not null) MoveRoomLocation(instructions.Room, instructions.RoomMovement.Value);
 
                 if (_gameState.IsGameOver) break;
             } while ((instructions = instructions.Next) is not null);
@@ -104,55 +93,92 @@ public class Game
     {
         HandleDialogue([
             "-------------------------------------------------------------------",
-            $"You are in a [blue]{_player.CurrentRoom.GetType().Name}[/] room at [yellow]{_player.X}[/],[yellow]{_player.Y}[/]"
+            $"You are in a [blue]{_player.CurrentRoom.GetType().Name}[/] room at [yellow]{_player.X}[/],[yellow]{_player.Y}[/]. Your quiver holds [lime]{_player.Arrows} arrows[/]."
         ]);
     }
 
     private Choice HandleUserInput()
     {
-        List<string> choices =
+        IEnumerable<string> choices =
         [
-            "Move " + Choice.East.Humanize(),
-            "Move " + Choice.West.Humanize(),
-            "Move " + Choice.North.Humanize(),
-            "Move " + Choice.South.Humanize()
+            Choice.MoveNorth.Humanize().Titleize(),
+            Choice.MoveEast.Humanize().Titleize(),
+            Choice.MoveSouth.Humanize().Titleize(),
+            Choice.MoveWest.Humanize().Titleize(),
+
+            Choice.ShootNorth.Humanize().Titleize(),
+            Choice.ShootEast.Humanize().Titleize(),
+            Choice.ShootSouth.Humanize().Titleize(),
+            Choice.ShootWest.Humanize().Titleize()
         ];
 
         var roomActions = _player.CurrentRoom.GetRoomActions();
-        choices.AddRange(roomActions.Select(action => action.Humanize().Titleize()));
+        choices = roomActions.Select(action => action.Humanize().Titleize()).Concat(choices);
 
         var action = AnsiConsole.Prompt(new SelectionPrompt<string>()
             .Title("What do you want to do?")
             .AddChoices(choices));
-        return action.Replace("Move ", string.Empty).DehumanizeTo<Choice>();
+        return action.DehumanizeTo<Choice>();
     }
 
     private RoomBase HandleChoice(Choice choice)
     {
         switch (choice)
         {
-            case Choice.North when _player.Y > _rooms.GetLowerBound(1):
-                _player.Y--;
+            case Choice.MoveNorth:
+                HandlePlayerMovement(_player.X, _player.Y - 1);
                 break;
-            case Choice.East when _player.X < _rooms.GetUpperBound(0):
-                _player.X++;
+            case Choice.MoveEast:
+                HandlePlayerMovement(_player.X + 1, _player.Y);
                 break;
-            case Choice.South when _player.Y < _rooms.GetUpperBound(1):
-                _player.Y++;
+            case Choice.MoveSouth:
+                HandlePlayerMovement(_player.X, _player.Y + 1);
                 break;
-            case Choice.West when _player.X > _rooms.GetLowerBound(0):
-                _player.X--;
+            case Choice.MoveWest:
+                HandlePlayerMovement(_player.X - 1, _player.Y);
                 break;
-            case Choice.Activate: // Fall through as to not hit the default.
+            case Choice.ShootNorth:
+                HandleArrowFire(_player.X, _player.Y - 1);
                 break;
-            default:
-                AnsiConsole.MarkupLine("[red]You moved into a wall. Ouch![/]");
+            case Choice.ShootEast:
+                HandleArrowFire(_player.X + 1, _player.Y);
+                break;
+            case Choice.ShootSouth:
+                HandleArrowFire(_player.X, _player.Y + 1);
+                break;
+            case Choice.ShootWest:
+                HandleArrowFire(_player.X - 1, _player.Y);
                 break;
         }
 
         HandleDialogue(_player.CurrentRoom.HandleRoomAction(choice));
         _player.CurrentRoom = _rooms[_player.X, _player.Y];
         return _player.CurrentRoom;
+    }
+
+    private void HandlePlayerMovement(int x, int y)
+    {
+        if (!IsValidGamePosition((byte)x, (byte)y))
+        {
+            HandleDialogue("[darkorange3]You moved into a wall. Ouch![/]");
+            return;
+        }
+
+        _player.X = (byte)x;
+        _player.Y = (byte)y;
+    }
+
+    private void HandleArrowFire(int x, int y)
+    {
+        HandleDialogue(_player.ShootArrow());
+
+        if (!IsValidGamePosition((byte)x, (byte)y))
+        {
+            HandleDialogue("[darkorange3]You shot into the void.[/]");
+            return;
+        }
+
+        HandleDialogue(_rooms[x, y].HandleRoomAction(Choice.Attack));
     }
 
     private void MoveRoomLocation(RoomBase room, Choice movement)
@@ -166,72 +192,45 @@ public class Game
 
         switch (movement)
         {
-            case Choice.North when roomLocation.Y > _rooms.GetLowerBound(1):
-                _rooms[x, y] = new Empty { GameState = _gameState };
-
-                if (_rooms[x, y - 1] is not Empty)
-                {
-                    var (ranX, ranY) = GetEmptyRoomLocation();
-                    _rooms[ranX, ranY] = room;
-                }
-
-                _rooms[x, y - 1] = room;
+            case Choice.MoveNorth:
+                HandleRoomMove(room, x, y, x, y - 1);
                 break;
-            case Choice.East when roomLocation.X < _rooms.GetUpperBound(0):
-                _rooms[x, y] = new Empty { GameState = _gameState };
-
-                if (_rooms[x + 1, y] is not Empty)
-                {
-                    var (ranX, ranY) = GetEmptyRoomLocation();
-                    _rooms[ranX, ranY] = room;
-                }
-
-                _rooms[x + 1, y] = room;
+            case Choice.MoveEast:
+                HandleRoomMove(room, x, y, x + 1, y);
                 break;
-            case Choice.South when roomLocation.Y < _rooms.GetUpperBound(1):
-                _rooms[x, y] = new Empty { GameState = _gameState };
-
-                if (_rooms[x, y + 1] is not Empty)
-                {
-                    var (ranX, ranY) = GetEmptyRoomLocation();
-                    _rooms[ranX, ranY] = room;
-                }
-
-                _rooms[x, y + 1] = room;
-
+            case Choice.MoveSouth:
+                HandleRoomMove(room, x, y, x, y + 1);
                 break;
-            case Choice.West when roomLocation.X > _rooms.GetLowerBound(0):
-                _rooms[x, y] = new Empty { GameState = _gameState };
-
-                if (_rooms[x - 1, y] is not Empty)
-                {
-                    var (ranX, ranY) = GetEmptyRoomLocation();
-                    _rooms[ranX, ranY] = room;
-                }
-
-                _rooms[x - 1, y] = room;
+            case Choice.MoveWest:
+                HandleRoomMove(room, x, y, x - 1, y);
                 break;
         }
     }
 
+    private void HandleRoomMove(RoomBase room, int oldX, int oldY, int newX, int newY)
+    {
+        if (!IsValidGamePosition(newX, newY) || _rooms[newX, newY] is not Empty) (newX, newY) = GetEmptyRoomLocation();
+
+        _rooms[oldX, oldY] = new Empty { GameState = _gameState };
+        _rooms[newX, newY] = room;
+    }
+
     private void CheckAdjacentRooms()
     {
+        List<string> dialogue = [];
         for (var i = _player.X - 1; i <= _player.X + 1; i++)
         {
             for (var j = _player.Y - 1; j <= _player.Y + 1; j++)
             {
                 var isCurrentRoom = i == _player.X && j == _player.Y;
-                var crossLeftBoundary = i < _rooms.GetLowerBound(0);
-                var crossRightBoundary = i > _rooms.GetUpperBound(0);
-                var crossUpperBoundary = j < _rooms.GetLowerBound(1);
-                var crossLowerBoundary = j > _rooms.GetUpperBound(1);
-
-                if (isCurrentRoom || crossLeftBoundary || crossRightBoundary || crossUpperBoundary || crossLowerBoundary) continue;
+                if (isCurrentRoom || !IsValidGamePosition(i, j)) continue;
 
                 var room = _rooms[i, j];
-                HandleDialogue(room.AdjacentRoomCheck());
+                dialogue.AddRange(room.AdjacentRoomCheck());
             }
         }
+
+        HandleDialogue(dialogue.Distinct().ToArray());
     }
 
     private (byte? X, byte? Y) FindRoom(RoomBase room)
@@ -245,5 +244,15 @@ public class Game
         }
 
         return (null, null);
+    }
+
+    private bool IsValidGamePosition(int x, int y)
+    {
+        var crossLeftBoundary = x < _rooms.GetLowerBound(0);
+        var crossRightBoundary = x > _rooms.GetUpperBound(0);
+        var crossUpperBoundary = y < _rooms.GetLowerBound(1);
+        var crossLowerBoundary = y > _rooms.GetUpperBound(1);
+
+        return !(crossLeftBoundary || crossRightBoundary || crossUpperBoundary || crossLowerBoundary);
     }
 }

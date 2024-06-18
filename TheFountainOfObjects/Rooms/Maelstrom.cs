@@ -9,22 +9,23 @@ public class Maelstrom : RoomBase
         return new RoomInstruction
         {
             Room = this,
-            Dialogue = "[yellow]You hear the growling and groaning of a maelstrom nearby.[/]",
-            PlayerMovement = Choice.North,
-            RoomMovement = Choice.South,
+            PlayerMovement = Choice.MoveNorth,
+            RoomMovement = Choice.MoveSouth,
             Next = new RoomInstruction
             {
                 Room = this,
-                PlayerMovement = Choice.East,
-                RoomMovement = Choice.West,
+                PlayerMovement = Choice.MoveEast,
+                RoomMovement = Choice.MoveWest,
                 Next = new RoomInstruction
                 {
                     Room = this,
                     Dialogue = "[red]You have been sucked into the maelstrom and blown away![/]",
-                    PlayerMovement = Choice.East,
-                    RoomMovement = Choice.West
+                    PlayerMovement = Choice.MoveEast,
+                    RoomMovement = Choice.MoveWest
                 }
             }
         };
     }
+    
+    public override string[] AdjacentRoomCheck() => ["[yellow]You can hear the growling and groaning of a maelstrom nearby.[/]"];
 }
