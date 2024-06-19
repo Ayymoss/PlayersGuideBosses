@@ -9,7 +9,7 @@ public class Fountain : RoomBase
     {
         return
         [
-            new DialogueInstruction(this)
+            new DialogueInstruction
             {
                 Dialogue = GameState.FountainActivated
                     ? "[green]You hear the rushing waters from the Fountain of Objects. It has been reactivated![/]"

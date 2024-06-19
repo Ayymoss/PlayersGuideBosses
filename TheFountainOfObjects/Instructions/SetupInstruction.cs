@@ -1,3 +1,3 @@
 ﻿namespace TheFountainOfObjects.Instructions;
 
-public abstract class InstructionBase;
+public class SetupInstruction : InstructionBase;

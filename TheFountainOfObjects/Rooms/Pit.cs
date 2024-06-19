@@ -8,7 +8,7 @@ public class Pit : RoomBase
     {
         return
         [
-            new DialogueInstruction(this)
+            new DialogueInstruction
             {
                 Dialogue = "[red]You have fallen into a pit. You are dead.[/]",
             }
@@ -20,4 +20,6 @@ public class Pit : RoomBase
         GameState.IsGameOver = true;
         return base.EnterRoom();
     }
+    
+    public override string[] AdjacentRoomCheck() => ["[grey]You can hear the echoes of a pit nearby.[/]"];
 }

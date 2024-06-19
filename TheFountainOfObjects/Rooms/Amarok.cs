@@ -11,7 +11,7 @@ public class Amarok : RoomBase
     {
         return
         [
-            new DialogueInstruction(this)
+            new DialogueInstruction
             {
                 Dialogue = _isKilled ? "[yellow]You find a dead wolf.[/]" : "[red]You are in a room with a large wolf. You died.[/]"
             }

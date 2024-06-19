@@ -3,7 +3,7 @@ using TheFountainOfObjects.Rooms;
 
 namespace TheFountainOfObjects.Instructions;
 
-public class MovePlayerInstruction(RoomBase roomBase) : InstructionBase(roomBase)
+public class MovePlayerInstruction : InstructionBase
 {
     public required Choice Move { get; set; }
 }

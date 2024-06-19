@@ -35,7 +35,6 @@ public class Game
         }
 
         _rooms[0, 0] = _roomFactory.CreateEntranceRoom();
-        _rooms[2, 0] = _roomFactory.CreateMaelstromRoom(); // TODO: Remove this line
 
         var fountainLocation = GetEmptyRoomLocation();
         _rooms[fountainLocation.X, fountainLocation.Y] = _roomFactory.CreateFountainRoom();
@@ -71,8 +70,7 @@ public class Game
     public void StartGame()
     {
         Stack<InstructionBase> instructions = new();
-        PrintPosition();
-        CheckAdjacentRooms();
+        HandleInstruction(new SetupInstruction());
 
         while (!_gameState.IsGameOver)
         {
@@ -80,8 +78,8 @@ public class Game
             var room = HandleChoice(move);
 
             var newInstructionRoom = room.EnterRoom();
-            PrintPosition();
-            CheckAdjacentRooms();
+            HandleInstruction(new SetupInstruction());
+
             newInstructionRoom.Reverse();
             foreach (var instruction in newInstructionRoom) instructions.Push(instruction);
 
@@ -173,8 +171,6 @@ public class Game
 
         _player.X = (byte)x;
         _player.Y = (byte)y;
-
-        // TODO: Maybe move the EnterRoom call here so we can recursively handle each room's instructions?
     }
 
     private void HandleArrowFire(int x, int y)
@@ -235,19 +231,6 @@ public class Game
         HandleDialogue(dialogue.Distinct().ToArray());
     }
 
-    private (byte? X, byte? Y) FindRoom(RoomBase room)
-    {
-        for (byte i = 0; i < _rooms.GetUpperBound(0); i++)
-        {
-            for (byte j = 0; j < _rooms.GetUpperBound(1); j++)
-            {
-                if (_rooms[i, j] == room) return (i, j);
-            }
-        }
-
-        return (null, null);
-    }
-
     private bool IsValidGamePosition(int x, int y)
     {
         var crossLeftBoundary = x < _rooms.GetLowerBound(0);
@@ -264,7 +247,6 @@ public class Game
         {
             case MovePlayerInstruction movePlayerInstruction:
                 PrintPosition();
-                CheckAdjacentRooms();
                 HandleChoice(movePlayerInstruction.Move);
                 break;
             case MoveRoomInstruction moveRoomInstruction:
@@ -272,6 +254,10 @@ public class Game
                 break;
             case DialogueInstruction dialogueInstruction:
                 HandleDialogue(dialogueInstruction.Dialogue);
+                break;
+            case SetupInstruction:
+                PrintPosition();
+                CheckAdjacentRooms();
                 break;
         }
     }

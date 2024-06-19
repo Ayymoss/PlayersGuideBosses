@@ -9,7 +9,7 @@ public class Empty : RoomBase
     {
         return
         [
-            new DialogueInstruction(this)
+            new DialogueInstruction
             {
                 Dialogue = "[grey]This room is empty.[/]"
             }

@@ -8,7 +8,7 @@ public class Entrance : RoomBase
     {
         return
         [
-            new DialogueInstruction(this)
+            new DialogueInstruction
             {
                 Dialogue = GameState.FountainActivated
                     ? "[blue]The Fountain of Objects has been reactivated, and you have escaped with your life![/]"

@@ -9,34 +9,34 @@ public class Maelstrom : RoomBase
     {
         return
         [
-            new MoveRoomInstruction(this)
+            new MoveRoomInstruction
             {
                 Move = Choice.MoveSouth,
             },
-            new MoveRoomInstruction(this)
+            new MoveRoomInstruction
             {
                 Move = Choice.MoveWest,
             },
-            new MoveRoomInstruction(this)
+            new MoveRoomInstruction
             {
                 Move = Choice.MoveWest
             },
 
-            new MovePlayerInstruction(this)
+            new MovePlayerInstruction
             {
                 Move = Choice.MoveNorth,
             },
-            new MovePlayerInstruction(this)
+            new MovePlayerInstruction
             {
                 Move = Choice.MoveEast,
             },
-            new MovePlayerInstruction(this)
+            new MovePlayerInstruction
             {
                 Move = Choice.MoveEast
             },
 
 
-            new DialogueInstruction(this)
+            new DialogueInstruction
             {
                 Dialogue = "[red]You have been sucked into the maelstrom and blown away![/]"
             }
