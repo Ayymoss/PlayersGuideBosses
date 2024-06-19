@@ -1,18 +1,21 @@
 ﻿using TheFountainOfObjects.Enums;
+using TheFountainOfObjects.Instructions;
 
 namespace TheFountainOfObjects.Rooms;
 
 public class Fountain : RoomBase
 {
-    protected override RoomInstruction GetRoomInstructions()
+    protected override List<InstructionBase> GetRoomInstructions()
     {
-        return new RoomInstruction
-        {
-            Room = this,
-            Dialogue = GameState.FountainActivated
-                ? "[green]You hear the rushing waters from the Fountain of Objects. It has been reactivated![/]"
-                : "[blue]You hear water dripping in this room. The Fountain of Objects is here![/]",
-        };
+        return
+        [
+            new DialogueInstruction(this)
+            {
+                Dialogue = GameState.FountainActivated
+                    ? "[green]You hear the rushing waters from the Fountain of Objects. It has been reactivated![/]"
+                    : "[blue]You hear water dripping in this room. The Fountain of Objects is here![/]",
+            }
+        ];
     }
 
     public override List<Choice> GetRoomActions() => !GameState.FountainActivated ? [Choice.Activate] : [];

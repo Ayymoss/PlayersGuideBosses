@@ -1,6 +1,7 @@
 ﻿using Humanizer;
 using Spectre.Console;
 using TheFountainOfObjects.Enums;
+using TheFountainOfObjects.Instructions;
 using TheFountainOfObjects.Rooms;
 
 namespace TheFountainOfObjects;
@@ -10,9 +11,11 @@ public class Game
     private readonly Player _player;
     private readonly RoomBase[,] _rooms;
     private readonly GameState _gameState = new();
+    private readonly RoomFactory _roomFactory;
 
     public Game(GameSize size)
     {
+        _roomFactory = new RoomFactory(_gameState);
         var (gridSize, maelstromCount) = size switch
         {
             GameSize.Small => (4, 1),
@@ -27,25 +30,26 @@ public class Game
         {
             for (var j = 0; j < gridSize; j++)
             {
-                _rooms[i, j] = new Empty { GameState = _gameState };
+                _rooms[i, j] = _roomFactory.CreateEmptyRoom();
             }
         }
 
-        _rooms[0, 0] = new Entrance { GameState = _gameState };
+        _rooms[0, 0] = _roomFactory.CreateEntranceRoom();
+        _rooms[2, 0] = _roomFactory.CreateMaelstromRoom(); // TODO: Remove this line
 
         var fountainLocation = GetEmptyRoomLocation();
-        _rooms[fountainLocation.X, fountainLocation.Y] = new Fountain { GameState = _gameState };
+        _rooms[fountainLocation.X, fountainLocation.Y] = _roomFactory.CreateFountainRoom();
 
         var pitLocation = GetEmptyRoomLocation();
-        _rooms[pitLocation.X, pitLocation.Y] = new Pit { GameState = _gameState };
+        _rooms[pitLocation.X, pitLocation.Y] = _roomFactory.CreatePitRoom();
 
         for (var i = 0; i < maelstromCount; i++)
         {
             var maelstromLocation = GetEmptyRoomLocation();
-            _rooms[maelstromLocation.X, maelstromLocation.Y] = new Maelstrom { GameState = _gameState };
+            _rooms[maelstromLocation.X, maelstromLocation.Y] = _roomFactory.CreateMaelstromRoom();
 
             var amarokLocation = GetEmptyRoomLocation();
-            _rooms[amarokLocation.X, amarokLocation.Y] = new Amarok { GameState = _gameState };
+            _rooms[amarokLocation.X, amarokLocation.Y] = _roomFactory.CreateAmarokRoom();
         }
 
         _player = new Player { CurrentRoom = _rooms[0, 0] };
@@ -66,21 +70,35 @@ public class Game
 
     public void StartGame()
     {
+        Stack<InstructionBase> instructions = new();
+        PrintPosition();
+        CheckAdjacentRooms();
+
         while (!_gameState.IsGameOver)
         {
+            var move = HandleUserInput();
+            var room = HandleChoice(move);
+
+            var newInstructionRoom = room.EnterRoom();
             PrintPosition();
             CheckAdjacentRooms();
-            var move = HandleUserInput();
-            var instructions = HandleChoice(move).EnterRoom();
+            newInstructionRoom.Reverse();
+            foreach (var instruction in newInstructionRoom) instructions.Push(instruction);
 
-            do // TODO: Handle rooms if moved through many quickly (e.g. maelstrom). Currently they're skipped over.
+            while (instructions.Count != 0)
             {
-                if (instructions.Dialogue is not null) HandleDialogue(instructions.Dialogue);
-                if (instructions.PlayerMovement is not null) HandleChoice(instructions.PlayerMovement.Value);
-                if (instructions.RoomMovement is not null) MoveRoomLocation(instructions.Room, instructions.RoomMovement.Value);
+                if (room != _player.CurrentRoom)
+                {
+                    room = _player.CurrentRoom;
+                    newInstructionRoom = room.EnterRoom();
+                    newInstructionRoom.Reverse();
+                    foreach (var instruction in newInstructionRoom) instructions.Push(instruction);
+                }
 
+                var currentInstruction = instructions.Pop();
+                HandleInstruction(currentInstruction);
                 if (_gameState.IsGameOver) break;
-            } while ((instructions = instructions.Next) is not null);
+            }
         }
     }
 
@@ -99,21 +117,9 @@ public class Game
 
     private Choice HandleUserInput()
     {
-        IEnumerable<string> choices =
-        [
-            Choice.MoveNorth.Humanize().Titleize(),
-            Choice.MoveEast.Humanize().Titleize(),
-            Choice.MoveSouth.Humanize().Titleize(),
-            Choice.MoveWest.Humanize().Titleize(),
-
-            Choice.ShootNorth.Humanize().Titleize(),
-            Choice.ShootEast.Humanize().Titleize(),
-            Choice.ShootSouth.Humanize().Titleize(),
-            Choice.ShootWest.Humanize().Titleize()
-        ];
-
+        var choices = _player.GetChoices().Select(x => x.Humanize().Titleize());
         var roomActions = _player.CurrentRoom.GetRoomActions();
-        choices = roomActions.Select(action => action.Humanize().Titleize()).Concat(choices);
+        choices = roomActions.Select(x => x.Humanize().Titleize()).Concat(choices);
 
         var action = AnsiConsole.Prompt(new SelectionPrompt<string>()
             .Title("What do you want to do?")
@@ -153,6 +159,7 @@ public class Game
 
         HandleDialogue(_player.CurrentRoom.HandleRoomAction(choice));
         _player.CurrentRoom = _rooms[_player.X, _player.Y];
+
         return _player.CurrentRoom;
     }
 
@@ -166,6 +173,8 @@ public class Game
 
         _player.X = (byte)x;
         _player.Y = (byte)y;
+
+        // TODO: Maybe move the EnterRoom call here so we can recursively handle each room's instructions?
     }
 
     private void HandleArrowFire(int x, int y)
@@ -181,38 +190,31 @@ public class Game
         HandleDialogue(_rooms[x, y].HandleRoomAction(Choice.Attack));
     }
 
-    private void MoveRoomLocation(RoomBase room, Choice movement)
+    private void MoveRoomLocation(int currentX, int currentY, Choice movement)
     {
-        var roomLocation = FindRoom(room);
-
-        if (!roomLocation.X.HasValue || !roomLocation.Y.HasValue) return;
-
-        var x = roomLocation.X.Value;
-        var y = roomLocation.Y.Value;
+        var newX = currentX;
+        var newY = currentY;
 
         switch (movement)
         {
             case Choice.MoveNorth:
-                HandleRoomMove(room, x, y, x, y - 1);
+                newY--;
                 break;
             case Choice.MoveEast:
-                HandleRoomMove(room, x, y, x + 1, y);
+                newX++;
                 break;
             case Choice.MoveSouth:
-                HandleRoomMove(room, x, y, x, y + 1);
+                newY++;
                 break;
             case Choice.MoveWest:
-                HandleRoomMove(room, x, y, x - 1, y);
+                newX--;
                 break;
         }
-    }
 
-    private void HandleRoomMove(RoomBase room, int oldX, int oldY, int newX, int newY)
-    {
         if (!IsValidGamePosition(newX, newY) || _rooms[newX, newY] is not Empty) (newX, newY) = GetEmptyRoomLocation();
 
-        _rooms[oldX, oldY] = new Empty { GameState = _gameState };
-        _rooms[newX, newY] = room;
+        _rooms[newX, newY] = _rooms[currentX, currentY];
+        _rooms[currentX, currentY] = _roomFactory.CreateEmptyRoom();
     }
 
     private void CheckAdjacentRooms()
@@ -254,5 +256,23 @@ public class Game
         var crossLowerBoundary = y > _rooms.GetUpperBound(1);
 
         return !(crossLeftBoundary || crossRightBoundary || crossUpperBoundary || crossLowerBoundary);
+    }
+
+    private void HandleInstruction(InstructionBase instruction)
+    {
+        switch (instruction)
+        {
+            case MovePlayerInstruction movePlayerInstruction:
+                PrintPosition();
+                CheckAdjacentRooms();
+                HandleChoice(movePlayerInstruction.Move);
+                break;
+            case MoveRoomInstruction moveRoomInstruction:
+                MoveRoomLocation(_player.X, _player.Y, moveRoomInstruction.Move);
+                break;
+            case DialogueInstruction dialogueInstruction:
+                HandleDialogue(dialogueInstruction.Dialogue);
+                break;
+        }
     }
 }

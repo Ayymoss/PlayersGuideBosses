@@ -1,18 +1,21 @@
-﻿
+﻿using TheFountainOfObjects.Instructions;
+
 namespace TheFountainOfObjects.Rooms;
 
 public class Pit : RoomBase
 {
-    protected override RoomInstruction GetRoomInstructions()
+    protected override List<InstructionBase> GetRoomInstructions()
     {
-        return new RoomInstruction
-        {
-            Room = this,
-            Dialogue = "[red]You have fallen into a pit. You are dead.[/]",
-        };
+        return
+        [
+            new DialogueInstruction(this)
+            {
+                Dialogue = "[red]You have fallen into a pit. You are dead.[/]",
+            }
+        ];
     }
 
-    public override RoomInstruction EnterRoom()
+    public override List<InstructionBase> EnterRoom()
     {
         GameState.IsGameOver = true;
         return base.EnterRoom();

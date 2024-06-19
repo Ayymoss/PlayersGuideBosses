@@ -1,4 +1,5 @@
 ﻿using TheFountainOfObjects.Enums;
+using TheFountainOfObjects.Instructions;
 
 namespace TheFountainOfObjects.Rooms;
 
@@ -6,18 +7,20 @@ public class Amarok : RoomBase
 {
     private bool _isKilled;
 
-    protected override RoomInstruction GetRoomInstructions()
+    protected override List<InstructionBase> GetRoomInstructions()
     {
-        return new RoomInstruction
-        {
-            Room = this,
-            Dialogue = _isKilled ? "[yellow]You find a dead wolf.[/]" : "[red]You are in a room with a large wolf. You died.[/]"
-        };
+        return
+        [
+            new DialogueInstruction(this)
+            {
+                Dialogue = _isKilled ? "[yellow]You find a dead wolf.[/]" : "[red]You are in a room with a large wolf. You died.[/]"
+            }
+        ];
     }
 
     public override string[] AdjacentRoomCheck() => _isKilled ? [] : ["You can smell the rotten stench of an amarok in a nearby room."];
 
-    public override RoomInstruction EnterRoom()
+    public override List<InstructionBase> EnterRoom()
     {
         if (!_isKilled) GameState.IsGameOver = true;
         return base.EnterRoom();

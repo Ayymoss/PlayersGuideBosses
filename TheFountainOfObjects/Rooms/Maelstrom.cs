@@ -1,31 +1,47 @@
 ﻿using TheFountainOfObjects.Enums;
+using TheFountainOfObjects.Instructions;
 
 namespace TheFountainOfObjects.Rooms;
 
 public class Maelstrom : RoomBase
 {
-    protected override RoomInstruction GetRoomInstructions()
+    protected override List<InstructionBase> GetRoomInstructions()
     {
-        return new RoomInstruction
-        {
-            Room = this,
-            PlayerMovement = Choice.MoveNorth,
-            RoomMovement = Choice.MoveSouth,
-            Next = new RoomInstruction
+        return
+        [
+            new MoveRoomInstruction(this)
             {
-                Room = this,
-                PlayerMovement = Choice.MoveEast,
-                RoomMovement = Choice.MoveWest,
-                Next = new RoomInstruction
-                {
-                    Room = this,
-                    Dialogue = "[red]You have been sucked into the maelstrom and blown away![/]",
-                    PlayerMovement = Choice.MoveEast,
-                    RoomMovement = Choice.MoveWest
-                }
+                Move = Choice.MoveSouth,
+            },
+            new MoveRoomInstruction(this)
+            {
+                Move = Choice.MoveWest,
+            },
+            new MoveRoomInstruction(this)
+            {
+                Move = Choice.MoveWest
+            },
+
+            new MovePlayerInstruction(this)
+            {
+                Move = Choice.MoveNorth,
+            },
+            new MovePlayerInstruction(this)
+            {
+                Move = Choice.MoveEast,
+            },
+            new MovePlayerInstruction(this)
+            {
+                Move = Choice.MoveEast
+            },
+
+
+            new DialogueInstruction(this)
+            {
+                Dialogue = "[red]You have been sucked into the maelstrom and blown away![/]"
             }
-        };
+        ];
     }
-    
-    public override string[] AdjacentRoomCheck() => ["[yellow]You can hear the growling and groaning of a maelstrom nearby.[/]"];
+
+    public override string[] AdjacentRoomCheck() => ["[yellow]You can hear the whirling of a maelstrom nearby.[/]"];
 }
