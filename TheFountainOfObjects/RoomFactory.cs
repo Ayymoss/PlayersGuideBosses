@@ -1,13 +1,17 @@
-﻿using TheFountainOfObjects.Rooms;
+﻿using TheFountainOfObjects.Enums;
+using TheFountainOfObjects.Rooms;
 
 namespace TheFountainOfObjects;
 
 public class RoomFactory(GameState gameState)
 {
-    public Empty CreateEmptyRoom() => new() { GameState = gameState };
-    public Fountain CreateFountainRoom() => new() { GameState = gameState };
-    public Pit CreatePitRoom() => new() { GameState = gameState };
-    public Maelstrom CreateMaelstromRoom() => new() { GameState = gameState };
-    public Amarok CreateAmarokRoom() => new() { GameState = gameState };
-    public Entrance CreateEntranceRoom() => new() { GameState = gameState };
+    public RoomBase CreateRoom(RoomType roomType) => roomType switch
+    {
+        RoomType.Amarok => new Amarok { GameState = gameState },
+        RoomType.Empty => new Empty { GameState = gameState },
+        RoomType.Entrance => new Entrance { GameState = gameState },
+        RoomType.Fountain => new Fountain { GameState = gameState },
+        RoomType.Maelstrom => new Maelstrom { GameState = gameState },
+        RoomType.Pit => new Pit { GameState = gameState },
+    };
 }

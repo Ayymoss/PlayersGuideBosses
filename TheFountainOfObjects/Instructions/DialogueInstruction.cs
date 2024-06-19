@@ -1,6 +1,4 @@
-﻿using TheFountainOfObjects.Rooms;
-
-namespace TheFountainOfObjects.Instructions;
+﻿namespace TheFountainOfObjects.Instructions;
 
 public class DialogueInstruction : InstructionBase
 {

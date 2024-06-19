@@ -30,25 +30,25 @@ public class Game
         {
             for (var j = 0; j < gridSize; j++)
             {
-                _rooms[i, j] = _roomFactory.CreateEmptyRoom();
+                _rooms[i, j] = _roomFactory.CreateRoom(RoomType.Empty);
             }
         }
 
-        _rooms[0, 0] = _roomFactory.CreateEntranceRoom();
+        _rooms[0, 0] = _roomFactory.CreateRoom(RoomType.Entrance);
 
         var fountainLocation = GetEmptyRoomLocation();
-        _rooms[fountainLocation.X, fountainLocation.Y] = _roomFactory.CreateFountainRoom();
+        _rooms[fountainLocation.X, fountainLocation.Y] = _roomFactory.CreateRoom(RoomType.Fountain);
 
         var pitLocation = GetEmptyRoomLocation();
-        _rooms[pitLocation.X, pitLocation.Y] = _roomFactory.CreatePitRoom();
+        _rooms[pitLocation.X, pitLocation.Y] = _roomFactory.CreateRoom(RoomType.Pit);
 
         for (var i = 0; i < maelstromCount; i++)
         {
             var maelstromLocation = GetEmptyRoomLocation();
-            _rooms[maelstromLocation.X, maelstromLocation.Y] = _roomFactory.CreateMaelstromRoom();
+            _rooms[maelstromLocation.X, maelstromLocation.Y] = _roomFactory.CreateRoom(RoomType.Maelstrom);
 
             var amarokLocation = GetEmptyRoomLocation();
-            _rooms[amarokLocation.X, amarokLocation.Y] = _roomFactory.CreateAmarokRoom();
+            _rooms[amarokLocation.X, amarokLocation.Y] = _roomFactory.CreateRoom(RoomType.Amarok);
         }
 
         _player = new Player { CurrentRoom = _rooms[0, 0] };
@@ -210,7 +210,7 @@ public class Game
         if (!IsValidGamePosition(newX, newY) || _rooms[newX, newY] is not Empty) (newX, newY) = GetEmptyRoomLocation();
 
         _rooms[newX, newY] = _rooms[currentX, currentY];
-        _rooms[currentX, currentY] = _roomFactory.CreateEmptyRoom();
+        _rooms[currentX, currentY] = _roomFactory.CreateRoom(RoomType.Empty);
     }
 
     private void CheckAdjacentRooms()
